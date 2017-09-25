@@ -21,4 +21,10 @@ public abstract class JobDescriptionDao {
 
     @SqlBatch("delete from job_description where dep_code = :depCode and dep_job = :depJob")
     public abstract void delete(@BindBean List<JobDescription> jobs);
+
+    @SqlUpdate("TRUNCATE TABLE job_description AND COMMIT")
+    public abstract void clean();
+
+    @SqlUpdate("INSERT INTO job_description (dep_code, dep_job, description) VALUES (:depCode, :depJob, :description)")
+    public abstract void insert(@BindBean JobDescription jobDescription);
 }
