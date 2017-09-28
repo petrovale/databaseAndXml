@@ -4,6 +4,7 @@ import com.company.DBIProvider;
 import com.company.dao.JobDescriptionDao;
 import com.company.model.JobDescription;
 import com.company.util.StaxStreamProcessor;
+import org.skife.jdbi.v2.sqlobject.Transaction;
 
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.events.XMLEvent;
@@ -15,7 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class SynchronizerDBbyXML {
+public class SynchronizerByXML {
     private final JobDescriptionDao jobDescriptionDao = DBIProvider.getDao(JobDescriptionDao.class);
 
     public void synchronize(String pathFileName) throws Exception {
@@ -25,6 +26,7 @@ public class SynchronizerDBbyXML {
         }
     }
 
+    @Transaction
     public void process(StaxStreamProcessor processor) throws XMLStreamException {
 
         List<JobDescription> jobsFromXML = new ArrayList<>();

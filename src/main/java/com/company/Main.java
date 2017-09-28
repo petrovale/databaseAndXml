@@ -1,7 +1,7 @@
 package com.company;
 
 import com.company.config.Configs;
-import com.company.export.SynchronizerDBbyXML;
+import com.company.export.SynchronizerByXML;
 import com.typesafe.config.Config;
 import com.company.export.JobDescriptionExporterToXml;
 
@@ -21,7 +21,7 @@ public class Main {
                     exporterToXml.writeToXml(Paths.get(args[1]));
                     break;
                 case "sync":
-                    final SynchronizerDBbyXML synchronizerDBbyXML = new SynchronizerDBbyXML();
+                    final SynchronizerByXML synchronizerDBbyXML = new SynchronizerByXML();
                     synchronizerDBbyXML.synchronize(args[1]);
                     break;
                 default:
