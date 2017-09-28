@@ -22,32 +22,21 @@ public class SynchronizerByXML {
     public void synchronize(String pathFileName) throws Exception {
         try (InputStream is = new FileInputStream(new File(pathFileName))) {
             final StaxStreamProcessor processor = new StaxStreamProcessor(is);
-            process(processor);
+
+            final Map<JobDescription, Boolean> mapForSynchronization = new HashMap<>();
+            getListDescriptionJobsFromXml(processor).
+                    forEach(job -> mapForSynchronization.put(job, false));
+
+            process(mapForSynchronization);
         }
     }
 
     @Transaction
-    public void process(StaxStreamProcessor processor) throws XMLStreamException {
-
-        List<JobDescription> jobsFromXML = new ArrayList<>();
-
-        while (processor.doUntil(XMLEvent.START_ELEMENT, "ОписаниеДолжности")) {
-
-            final int depCode = Integer.parseInt(processor.getAttribute("КодДепартамента"));
-            final int depJob = Integer.parseInt(processor.getAttribute("КодДолжности"));
-            final String description = processor.getReader().getElementText();
-
-            jobsFromXML.add(new JobDescription(depCode, depJob, description));
-        }
-
-        final List<JobDescription> jobsFromDB = jobDescriptionDao.getAll();
+    public void process(Map<JobDescription, Boolean> mapForSynchronization) throws XMLStreamException {
         final List<JobDescription> jobsToDelete = new ArrayList<>();
         final List<JobDescription> jobsToInsert = new ArrayList<>();
-        final Map<JobDescription, Boolean> mapForSynchronization = new HashMap<>();
 
-        jobsFromXML.forEach(job -> mapForSynchronization.put(job, false));
-
-        jobsFromDB.forEach(job -> {
+        jobDescriptionDao.getAll().forEach(job -> {
             if (!mapForSynchronization.containsKey(job)) {
                 jobsToDelete.add(job);
             } else {
@@ -72,4 +61,19 @@ public class SynchronizerByXML {
             jobDescriptionDao.delete(jobsToDelete);
 
     }
+
+    private List<JobDescription> getListDescriptionJobsFromXml(StaxStreamProcessor processor) throws XMLStreamException {
+        List<JobDescription> jobsFromXML = new ArrayList<>();
+
+        while (processor.doUntil(XMLEvent.START_ELEMENT, "ОписаниеДолжности")) {
+
+            final int depCode = Integer.parseInt(processor.getAttribute("КодДепартамента"));
+            final int depJob = Integer.parseInt(processor.getAttribute("КодДолжности"));
+            final String description = processor.getReader().getElementText();
+
+            jobsFromXML.add(new JobDescription(depCode, depJob, description));
+        }
+        return jobsFromXML;
+    }
+
 }
